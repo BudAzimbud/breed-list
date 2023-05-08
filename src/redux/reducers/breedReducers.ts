@@ -1,7 +1,8 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axios from 'axios';
+import {getBreedImageApi, getBreedListApi} from '../../services/breedService';
 // Define a type for the slice state
-interface IBreed {
+export class IBreed {
   id: string;
   name: string;
   origin: string;
@@ -24,11 +25,15 @@ interface IBreed {
 }
 interface IBreedInitialState {
   list: IBreed[];
+  loading: boolean;
+  stopFetch: boolean;
 }
 
 // Define the initial state using that type
 const initialState: IBreedInitialState = {
   list: [],
+  loading: false,
+  stopFetch: false,
 };
 
 interface IParamsGetBreed {
@@ -41,16 +46,20 @@ export const getBreedList = createAsyncThunk(
   async (args: IParamsGetBreed, thunkAPI): Promise<any> => {
     try {
       //list bread
-      const breedListResponse = await axios.get(
-        `https://api.thecatapi.com/v1/breeds?limit=${args.limit}&page=${args.page}`,
-      );
+      const breedListResponse = await getBreedListApi(args);
       const breedListPromiseAll = await breedListResponse.data.map(
         async (item: any) => {
+          let image = {
+            data: {url: 'https://cdn2.thecatapi.com/images/CDhOtM-Ig.jpg'},
+          };
           //get image
-          const image = await axios.get(
-            'https://api.thecatapi.com/v1/images/' + item.reference_image_id,
-          );
-          return {...item, image: image.data.url};
+          try {
+            image = await getBreedImageApi(item.reference_image_id);
+          } catch (error) {
+            console.log(error);
+          }
+
+          return {...item, image: image?.data?.url};
         },
       );
       const result = await Promise.all(breedListPromiseAll);
@@ -65,15 +74,29 @@ export const breedslice = createSlice({
   name: 'counter',
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
-  reducers: {},
+  reducers: {
+    searchingBreed: (state, action) => {
+      const find = state.list.filter(
+        item => item.name.toLowerCase() === 'balinese',
+      );
+      state.list = find;
+    },
+  },
   extraReducers: builder => {
     builder.addCase(getBreedList.fulfilled, (state, action) => {
-      console.log('payload', action.payload);
-      state.list = action.payload;
+      state.list.push(...action.payload);
+      state.loading = false;
+      state.stopFetch = action.payload.length === 0;
+    });
+    builder.addCase(getBreedList.pending, state => {
+      state.loading = true;
+    });
+    builder.addCase(getBreedList.rejected, state => {
+      state.loading = false;
     });
   },
 });
 
-export const {} = breedslice.actions;
+export const {searchingBreed} = breedslice.actions;
 
 export default breedslice.reducer;
