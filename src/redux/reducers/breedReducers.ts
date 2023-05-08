@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {PayloadAction, createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {getBreedImageApi, getBreedListApi} from '../../services/breedService';
 // Define a type for the slice state
@@ -75,9 +75,10 @@ export const breedslice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    searchingBreed: (state, action) => {
+    searchingBreed: (state, action: PayloadAction<string>) => {
+      console.log(action);
       const find = state.list.filter(
-        item => item.name.toLowerCase() === 'balinese',
+        item => item.name.toLowerCase() === action.payload,
       );
       state.list = find;
     },

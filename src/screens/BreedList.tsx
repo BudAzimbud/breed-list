@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Text,
   TextInput,
@@ -9,7 +8,7 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from '../redux/hooks';
-import {getBreedList, searchingBreed} from '../redux/reducers/breedReducers';
+import {getBreedList} from '../redux/reducers/breedReducers';
 import CardCollapse from '../components/CardCollapse';
 import Icon from 'react-native-vector-icons/FontAwesome';
 export default function BreedsList(): JSX.Element {
@@ -20,9 +19,8 @@ export default function BreedsList(): JSX.Element {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    Alert.alert('called');
     dispatch(getBreedList({page, limit: 10}));
-  }, [page]);
+  }, [dispatch, page]);
 
   const renderFooter = () => {
     if (loading) {
@@ -58,9 +56,8 @@ export default function BreedsList(): JSX.Element {
         <TextInput
           style={{flex: 1, marginLeft: 10}}
           placeholder="Search for a breed"
-          onChangeText={text => {
-            dispatch(searchingBreed({keyword: text}));
-          }}
+          onChangeText={setKeyword}
+          value={keyword}
         />
         <TouchableOpacity
           onPress={() => {
@@ -78,7 +75,7 @@ export default function BreedsList(): JSX.Element {
             setPage(page + 1);
           }
         }}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={1}
         keyExtractor={item => item.id}
         // eslint-disable-next-line react-native/no-inline-styles
         contentContainerStyle={{
