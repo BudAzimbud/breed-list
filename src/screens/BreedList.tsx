@@ -43,7 +43,6 @@ export default function BreedsList(): JSX.Element {
 
   return (
     <View>
-      <Chart />
       <View
         style={{
           flexDirection: 'row',
