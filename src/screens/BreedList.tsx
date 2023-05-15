@@ -11,6 +11,7 @@ import {useAppDispatch, useAppSelector} from '../redux/hooks';
 import {getBreedList} from '../redux/reducers/breedReducers';
 import CardCollapse from '../components/CardCollapse';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import Chart from '../components/Chart';
 export default function BreedsList(): JSX.Element {
   const [page, setPage] = useState(0);
   const [keyword, setKeyword] = useState('');
@@ -42,6 +43,7 @@ export default function BreedsList(): JSX.Element {
 
   return (
     <View>
+      <Chart />
       <View
         style={{
           flexDirection: 'row',
